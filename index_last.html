@@ -43,7 +43,18 @@
             background-color: red;
             color: white;
         }
-    </style>
+    
+
+@media (pointer: coarse) {
+    .tile {
+        cursor: grab;
+    }
+    .tile:active {
+        transform: scale(1.05);
+    }
+}
+
+</style>
     </head>
     <body>
         <h1>Sonnet Jigsaw</h1>
@@ -53,6 +64,45 @@
         <button id="checkButton">Check Order</button>
         
         <script>
+let touchDragged = null;
+let touchStartY = 0;
+
+function handleTouchStart(event) {
+    touchDragged = event.target;
+    touchStartY = event.touches[0].clientY;
+    touchDragged.classList.add('dragging');
+}
+
+function handleTouchMove(event) {
+    event.preventDefault();
+    const touchY = event.touches[0].clientY;
+    const container = document.getElementById('tilesContainer');
+    const tiles = Array.from(container.children);
+
+    for (let tile of tiles) {
+        const rect = tile.getBoundingClientRect();
+        if (touchY > rect.top && touchY < rect.bottom && tile !== touchDragged) {
+            const draggedIndex = tiles.indexOf(touchDragged);
+            const targetIndex = tiles.indexOf(tile);
+
+            if (draggedIndex < targetIndex) {
+                container.insertBefore(touchDragged, tile.nextSibling);
+            } else {
+                container.insertBefore(touchDragged, tile);
+            }
+            break;
+        }
+    }
+}
+
+function handleTouchEnd(event) {
+    if (touchDragged) {
+        touchDragged.classList.remove('dragging');
+        touchDragged = null;
+    }
+}
+
+
         let sonnets = [];
         let selectedSonnet = [];
 
@@ -97,6 +147,11 @@
                 tile.addEventListener('dragover', handleDragOver);
                 tile.addEventListener('drop', handleDrop);
                 tile.addEventListener('dragend', handleDragEnd);
+
+tile.addEventListener('touchstart', handleTouchStart, { passive: false });
+tile.addEventListener('touchmove', handleTouchMove, { passive: false });
+tile.addEventListener('touchend', handleTouchEnd);
+
                 container.appendChild(tile);
             });
         }
@@ -159,6 +214,7 @@
         document.getElementById('checkButton').addEventListener('click', checkOrder);
 
         window.onload = fetchSonnets;
-    </script>
+    
+</script>
     </body>
 </html>
