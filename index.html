@@ -1,82 +1,117 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sonnet Jigsaw</title>
-    <style>        
-    body {
-        background-color: #f0f4f8;
-    }
-
-    .container {
-        display: flex;
-        flex-wrap: wrap;
-        width: 600px;
-        margin: 0 auto;
-    }
-    .tile {
-        width: 100%;
-        padding: 10px;
-        margin: 5px;
-        border: 1px solid #ccc;
-        cursor: pointer;
-        user-select: none;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        background-color: #f9f9f9;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        border-radius: 5px;
-    }
-    .tile:active {
-        transform: scale(1.05);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-    .dragging {
-        opacity: 0.5;
-        transform: rotate(2deg);
-    }
-    .correct {
-        background-color: green;
-        color: white;
-    }
-    .close {
-        background-color: orange;
-        color: white;
-    }
-    .wrong {
-        background-color: red;
-        color: white;
-    }
-
-    @media (max-width: 768px) {
-        .container {
-            width: 90%;
-            flex-direction: column;
-            align-items: center;
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
         }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            width: 600px;
+            margin: 0 auto;
+        }
+
         .tile {
             width: 100%;
-            font-size: 16px;
-            padding: 12px;
-        }
-        h1 {
-            font-size: 24px;
-            text-align: center;
-        }
-        button {
-            width: 100%;
-            font-size: 18px;
             padding: 10px;
-            margin-top: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
         }
-    }
+
+        .tile:active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+
+        .tile:hover {
+            background-color: #e3eaf0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+
+        .dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+        }
+
+        .correct {
+            background-color: green;
+            color: white;
+        }
+
+        .close {
+            background-color: orange;
+            color: white;
+        }
+
+        .wrong {
+            background-color: red;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .tile {
+                width: 100%;
+                font-size: 16px;
+                padding: 12px;
+            }
+
+            h1 {
+
+                font-size: 32px;
+                text-align: center;
+                margin-top: 30px;
+                color: #2c3e50;
+            }
+
+
+            button {
+                background-color: #3498db;
+                color: white;
+                border: none;
+                padding: 12px 20px;
+                font-size: 18px;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                display: block;
+                margin: 20px auto;
+            }
+
+            button:hover {
+                background-color: #2980b9;
+            }
+
+        }
     </style>
 </head>
+
 <body>
     <h1>Sonnet Jigsaw</h1>
     <p style="max-width: 600px; margin: 0 auto 20px; font-size: 16px; line-height: 1.5;">
-        Rearrange the lines of the sonnet by dragging each tile into the correct order. You can use your mouse or touch to move tiles. 
+        Rearrange the lines of the sonnet by dragging each tile into the correct order. You can use your mouse or touch
+        to move tiles.
         When you're done, click <strong>Check Order</strong> to see how close you are to the original sonnet.<br><br>
         <strong>Colour Coding:</strong><br>
         <span style="color: green;">Green</span> means the line is in the correct position.<br>
@@ -89,150 +124,151 @@
     <button id="checkButton">Check Order</button>
 
     <script>
-    let sonnets = [];
-    let selectedSonnet = [];
+        let sonnets = [];
+        let selectedSonnet = [];
 
-    async function fetchSonnets() {
-        try {
-            const response = await fetch('sonnets.json');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+        async function fetchSonnets() {
+            try {
+                const response = await fetch('sonnets.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                sonnets = await response.json();
+                initGame();
+            } catch (error) {
+                console.error('Error fetching sonnets:', error);
             }
-            sonnets = await response.json();
-            initGame();
-        } catch (error) {
-            console.error('Error fetching sonnets:', error);
         }
-    }
 
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
         }
-    }
 
-    function getRandomSonnet() {
-        const randomIndex = Math.floor(Math.random() * sonnets.length);
-        return sonnets[randomIndex];
-    }
+        function getRandomSonnet() {
+            const randomIndex = Math.floor(Math.random() * sonnets.length);
+            return sonnets[randomIndex];
+        }
 
-    let dragged;
-    let dragOverElement;
-    let touchDragged = null;
+        let dragged;
+        let dragOverElement;
+        let touchDragged = null;
 
-    function initGame() {
-        const container = document.getElementById('tilesContainer');
-        container.innerHTML = '';
-        selectedSonnet = getRandomSonnet();
-        const shuffledLines = [...selectedSonnet];
-        shuffle(shuffledLines);
-        shuffledLines.forEach((line, index) => {
-            const tile = document.createElement('div');
-            tile.className = 'tile';
-            tile.draggable = true;
-            tile.textContent = line;
-            tile.dataset.index = index;
-            tile.addEventListener('dragstart', handleDragStart);
-            tile.addEventListener('dragover', handleDragOver);
-            tile.addEventListener('drop', handleDrop);
-            tile.addEventListener('dragend', handleDragEnd);
-            tile.addEventListener('touchstart', handleTouchStart, { passive: false });
-            tile.addEventListener('touchmove', handleTouchMove, { passive: false });
-            tile.addEventListener('touchend', handleTouchEnd);
-            container.appendChild(tile);
-        });
-    }
-
-    function handleDragStart(event) {
-        dragged = event.target;
-        event.target.classList.add('dragging');
-        event.dataTransfer.effectAllowed = 'move';
-    }
-
-    function handleDragOver(event) {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = 'move';
-        const target = event.target;
-        if (target && target !== dragged && target.classList.contains('tile')) {
-            dragOverElement = target;
+        function initGame() {
             const container = document.getElementById('tilesContainer');
-            const children = Array.from(container.children);
-            const draggedIndex = children.indexOf(dragged);
-            const targetIndex = children.indexOf(target);
-
-            if (draggedIndex < targetIndex) {
-                container.insertBefore(dragged, target.nextSibling);
-            } else {
-                container.insertBefore(dragged, target);
-            }
+            container.innerHTML = '';
+            selectedSonnet = getRandomSonnet();
+            const shuffledLines = [...selectedSonnet];
+            shuffle(shuffledLines);
+            shuffledLines.forEach((line, index) => {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.draggable = true;
+                tile.textContent = line;
+                tile.dataset.index = index;
+                tile.addEventListener('dragstart', handleDragStart);
+                tile.addEventListener('dragover', handleDragOver);
+                tile.addEventListener('drop', handleDrop);
+                tile.addEventListener('dragend', handleDragEnd);
+                tile.addEventListener('touchstart', handleTouchStart, { passive: false });
+                tile.addEventListener('touchmove', handleTouchMove, { passive: false });
+                tile.addEventListener('touchend', handleTouchEnd);
+                container.appendChild(tile);
+            });
         }
-    }
 
-    function handleDrop(event) {
-        event.preventDefault();
-        if (dragOverElement) {
-            dragOverElement = null;
+        function handleDragStart(event) {
+            dragged = event.target;
+            event.target.classList.add('dragging');
+            event.dataTransfer.effectAllowed = 'move';
         }
-    }
 
-    function handleDragEnd(event) {
-        event.target.classList.remove('dragging');
-    }
-
-    function handleTouchStart(event) {
-        touchDragged = event.target;
-        touchDragged.classList.add('dragging');
-    }
-
-    function handleTouchMove(event) {
-        event.preventDefault();
-        const touchY = event.touches[0].clientY;
-        const container = document.getElementById('tilesContainer');
-        const tiles = Array.from(container.children);
-
-        for (let tile of tiles) {
-            const rect = tile.getBoundingClientRect();
-            if (touchY > rect.top && touchY < rect.bottom && tile !== touchDragged) {
-                const draggedIndex = tiles.indexOf(touchDragged);
-                const targetIndex = tiles.indexOf(tile);
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            const target = event.target;
+            if (target && target !== dragged && target.classList.contains('tile')) {
+                dragOverElement = target;
+                const container = document.getElementById('tilesContainer');
+                const children = Array.from(container.children);
+                const draggedIndex = children.indexOf(dragged);
+                const targetIndex = children.indexOf(target);
 
                 if (draggedIndex < targetIndex) {
-                    container.insertBefore(touchDragged, tile.nextSibling);
+                    container.insertBefore(dragged, target.nextSibling);
                 } else {
-                    container.insertBefore(touchDragged, tile);
+                    container.insertBefore(dragged, target);
                 }
-                break;
             }
         }
-    }
 
-    function handleTouchEnd(event) {
-        if (touchDragged) {
-            touchDragged.classList.remove('dragging');
-            touchDragged = null;
-        }
-    }
-
-    function checkOrder() {
-        const container = document.getElementById('tilesContainer');
-        const tiles = Array.from(container.children);
-        tiles.forEach((tile, index) => {
-            const lineText = tile.textContent;
-            const correctIndex = selectedSonnet.indexOf(lineText);
-            if (correctIndex === index) {
-                tile.className = 'tile correct';
-            } else if (Math.abs(correctIndex - index) <= 2) {
-                tile.className = 'tile close';
-            } else {
-                tile.className = 'tile wrong';
+        function handleDrop(event) {
+            event.preventDefault();
+            if (dragOverElement) {
+                dragOverElement = null;
             }
-        });
-    }
+        }
 
-    document.getElementById('checkButton').addEventListener('click', checkOrder);
+        function handleDragEnd(event) {
+            event.target.classList.remove('dragging');
+        }
 
-    window.onload = fetchSonnets;
+        function handleTouchStart(event) {
+            touchDragged = event.target;
+            touchDragged.classList.add('dragging');
+        }
+
+        function handleTouchMove(event) {
+            event.preventDefault();
+            const touchY = event.touches[0].clientY;
+            const container = document.getElementById('tilesContainer');
+            const tiles = Array.from(container.children);
+
+            for (let tile of tiles) {
+                const rect = tile.getBoundingClientRect();
+                if (touchY > rect.top && touchY < rect.bottom && tile !== touchDragged) {
+                    const draggedIndex = tiles.indexOf(touchDragged);
+                    const targetIndex = tiles.indexOf(tile);
+
+                    if (draggedIndex < targetIndex) {
+                        container.insertBefore(touchDragged, tile.nextSibling);
+                    } else {
+                        container.insertBefore(touchDragged, tile);
+                    }
+                    break;
+                }
+            }
+        }
+
+        function handleTouchEnd(event) {
+            if (touchDragged) {
+                touchDragged.classList.remove('dragging');
+                touchDragged = null;
+            }
+        }
+
+        function checkOrder() {
+            const container = document.getElementById('tilesContainer');
+            const tiles = Array.from(container.children);
+            tiles.forEach((tile, index) => {
+                const lineText = tile.textContent;
+                const correctIndex = selectedSonnet.indexOf(lineText);
+                if (correctIndex === index) {
+                    tile.className = 'tile correct';
+                } else if (Math.abs(correctIndex - index) <= 2) {
+                    tile.className = 'tile close';
+                } else {
+                    tile.className = 'tile wrong';
+                }
+            });
+        }
+
+        document.getElementById('checkButton').addEventListener('click', checkOrder);
+
+        window.onload = fetchSonnets;
     </script>
 </body>
+
 </html>
